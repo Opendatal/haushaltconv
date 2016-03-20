@@ -58,14 +58,14 @@ strFileNameUebersicht = os.getcwd() + "/../Offener-Haushalt/2014-2015/Uebersicht
 
 datensaetze = [h(2009, '2012-2013/Band3/', 1, 'Ergebnis', 14),
                h(2010, '2012-2013/Band3/', 2, 'Ergebnis', 14),
-               #h(2011, '2014-2015/06-Teilergebnispläne der Produkte/', 1, 'Ergebnis', 8),
+               h(2011, '2014-2015/06-Teilergebnispläne der Produkte/', 1, 'Ergebnis', 8),
                h(2012, '2012-2013/Band3/', 4, 'Plan', 14),
-               #h(2012, '2014-2015/06-Teilergebnispläne der Produkte/', 2, 'Ergebnis', 8),
+               h(2012, '2014-2015/06-Teilergebnispläne der Produkte/', 2, 'Ergebnis', 8),
                h(2013, '2012-2013/Band3/', 5, 'Plan', 14),                              
                h(2013, '2016-2017/04_Produkte/', 1, 'Ergebnis', 8),
-               #h(2014, '2014-2015/06-Teilergebnispläne der Produkte/', 4, 'Plan', 8),
+               h(2014, '2014-2015/06-Teilergebnispläne der Produkte/', 4, 'Plan', 8),
                h(2014, '2016-2017/04_Produkte/', 2, 'Ergebnis', 8),
-               #h(2015, '2014-2015/06-Teilergebnispläne der Produkte/', 5, 'Plan', 8),
+               h(2015, '2014-2015/06-Teilergebnispläne der Produkte/', 5, 'Plan', 8),
                h(2015, '2016-2017/04_Produkte/', 3, 'Ergebnis', 8),
                h(2016, '2016-2017/04_Produkte/', 4, 'Plan', 8),
                h(2017, '2016-2017/04_Produkte/', 5, 'Plan', 8),
@@ -73,7 +73,6 @@ datensaetze = [h(2009, '2012-2013/Band3/', 1, 'Ergebnis', 14),
                h(2019, '2016-2017/04_Produkte/', 7, 'Plan', 8),
                h(2020, '2016-2017/04_Produkte/', 8, 'Plan', 8)
                ]
-
 
 
 # -----------------------------------------------
@@ -145,10 +144,11 @@ df_uebersicht_produktbereiche = df_uebersicht_produktbereiche.drop_duplicates()
 
 # Fuehre den JOIN der Kostentabelle mit den Bezeichnungstabellen durch
 df_output = pd.merge(df_output, df_uebersicht_produkte, on='ProduktNR',how='left')
+df_output = df_output.fillna('Nicht definiert')
 df_output = pd.merge(df_output, df_uebersicht_produktbereiche, on='ProduktbereichNR',how='left')
 df_output = pd.merge(df_output, df_uebersicht_produktgruppen, on='ProduktgruppeNR',how='left')
 
 df_output[['ProduktbereichNR']] = df_output[['ProduktbereichNR']].astype(int)
 df_output[['ProduktgruppeNR']] = df_output[['ProduktgruppeNR']].astype(int)
 
-df_output.to_csv('wuppertal_haushalt2016.csv', index=False)
+df_output.to_csv('wuppertal_haushalt.csv', index=False)
