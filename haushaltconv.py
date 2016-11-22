@@ -19,20 +19,20 @@ class h:
     def __init__(self, jahr, verzeichnis, spalte, art, pos):
         self.jahr = jahr
         self.verzeichnis = verzeichnis
-        self.spalte = spalte # In welcher Spalte stehen die Daten?        
+        self.spalte = spalte # In welcher Spalte stehen die Daten?
         self.art = art # Plan / Ergebnis
         self.pos = pos # Wo steht im Dateinamen die Produktnummer?
 
 # Funktion zur Konvertierung des Strings, der den Betrag in EUR enthaelt, in eine Zahl
-def conv_betrag(wert):    
+def conv_betrag(wert):
     # Entferne Buchstaben
-    wert = wert.replace(' EUR', '')  
+    wert = wert.replace(' EUR', '')
     # Entferne .
-    wert = wert.replace('.', '')        
+    wert = wert.replace('.', '')
     # Ersetze , durch .
     wert = wert.replace(',', '.')
-    # Konvertiere in Zahl    
-    return float(wert)  
+    # Konvertiere in Zahl
+    return float(wert)
 
 # -----------------------------------------------
 # Definition von Konstanten
@@ -61,7 +61,7 @@ datensaetze = [h(2009, '2012-2013/Band3/', 1, 'Ergebnis', 14),
                h(2011, '2014-2015/06-Teilergebnispläne der Produkte/', 1, 'Ergebnis', 8),
                h(2012, '2012-2013/Band3/', 4, 'Plan', 14),
                h(2012, '2014-2015/06-Teilergebnispläne der Produkte/', 2, 'Ergebnis', 8),
-               h(2013, '2012-2013/Band3/', 5, 'Plan', 14),                              
+               h(2013, '2012-2013/Band3/', 5, 'Plan', 14),
                h(2013, '2016-2017/04_Produkte/', 1, 'Ergebnis', 8),
                h(2014, '2014-2015/06-Teilergebnispläne der Produkte/', 4, 'Plan', 8),
                h(2014, '2016-2017/04_Produkte/', 2, 'Ergebnis', 8),
@@ -84,39 +84,47 @@ output = []
 
 # Lade die einzelnen Produktdateien und extrahiere, Ausgaben und Ertraege
 for datensatz in datensaetze:
-    for file in os.listdir(strDataFolder + datensatz.verzeichnis):    
+    for file in os.listdir(strDataFolder + datensatz.verzeichnis):
         if not file.endswith(".csv"):
             continue
-        
+
         strFileName = strDataFolder + datensatz.verzeichnis + file
-        
-        produktid = int(file[datensatz.pos:(datensatz.pos+7)])    
-        
-        df_produkt = pd.read_csv(strFileName, sep=';', header=0)    
-        
+
+        produktid = int(file[datensatz.pos:(datensatz.pos+7)])
+
+        df_produkt = pd.read_csv(strFileName, sep=';', header=0)
+
         ertraege = 0.0
-        for zeile in zeilenErtraege:       
+        for zeile in zeilenErtraege:
             wert = str(df_produkt.iloc[zeile,datensatz.spalte])
             # Ueberspringe Zeile, falls Nan
             if (wert == 'nan'):
-                continue        
+                continue
             ertraege = ertraege + conv_betrag(wert)
-        
+        ertraege = ertraege * -1
+
         aufwendungen = 0.0
-        for zeile in zeilenAufwendungen:       
+        for zeile in zeilenAufwendungen:
             wert = str(df_produkt.iloc[zeile,datensatz.spalte])
             # Ueberspringe Zeile, falls Nan
             if (wert == 'nan'):
-                continue        
+                continue
             aufwendungen = aufwendungen + conv_betrag(wert)
-        
+
+
         if(ertraege != 0):
-            output.append([produktid, 'Ertrag', datensatz.art, datensatz.jahr, -ertraege])
+            output.append([produktid, 'Ertrag', datensatz.art, datensatz.jahr, "{:.2f}".format(ertraege)])
         if (aufwendungen != 0):
-            output.append([produktid, 'Aufwendung', datensatz.art, datensatz.jahr, aufwendungen])
+            output.append([produktid, 'Aufwendung', datensatz.art, datensatz.jahr, "{:.2f}".format(aufwendungen)])
+
+        if aufwendungen != 0 and ertraege != 0:
+            if aufwendungen > ertraege:
+                output.append([produktid, 'Verlust', datensatz.art, datensatz.jahr, "{:.2f}".format(aufwendungen - ertraege)])
+            if aufwendungen < ertraege:
+                output.append([produktid, 'Gewinn', datensatz.art, datensatz.jahr, "{:.2f}".format(ertraege - aufwendungen)])
 
 # Erstelle DataFrame aus dem Array mit den Kosten
-output = np.array(output)    
+output = np.array(output)
 df_output = pd.DataFrame(output, columns=['ProduktNR', 'Kontotyp', 'Art', 'Year', 'Amount'])
 df_output[['ProduktNR']] = df_output[['ProduktNR']].astype(int)
 
