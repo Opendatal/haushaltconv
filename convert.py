@@ -5,7 +5,9 @@ import pandas as pd
 def EUR2float(input):
     return float(str(input).replace(' EUR','').replace('.','').replace(',','.'))
 
-df_input = pd.read_csv('HHPL_Entwurf_2019.csv')
+year="2019"
+
+df_input = pd.read_csv('HHPL_Entwurf_'+year+'.csv')
 
 df_output = pd.DataFrame()
 
@@ -26,9 +28,9 @@ for index, row in df_input.iterrows():
     print("ProduktgruppeNR " + current_ProduktgruppeNR )
     current_ProduktNR = str(current_Projektstrukturplan)[6:8]
     print("ProduktNR " + current_ProduktNR )
-    if current_ProduktgruppeNR == "00":
+    if row['Stufe in Projekthier'] == 2:
         ProduktbereichNR[current_ProduktbereichNR] = str(current_Produkt)
-    if current_ProduktNR == "00":
+    if row['Stufe in Projekthier'] == 3:
         ProduktgruppeNR[current_ProduktgruppeNR] = str(current_Produkt)
     if row['Stufe in Projekthier'] != 4:
         continue
@@ -56,6 +58,6 @@ for index, row in df_input.iterrows():
     df_output.at[output_index,'ProduktNR'] = str(current_ProduktNR)
     output_index += 1
 
-df_output['Year'] = '2019'
+df_output['Year'] = year
 
-df_output.to_csv('wuppertal_haushalt_2019.csv', index=False)
+df_output.to_csv('wuppertal_haushalt_'+year+'.csv', index=False)
